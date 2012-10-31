@@ -8,6 +8,12 @@ import com.lmax.api.heartbeat.HeartbeatEventListener;
 import com.lmax.api.heartbeat.HeartbeatRequest;
 import com.lmax.api.heartbeat.HeartbeatSubscriptionRequest;
 
+/**
+ * @author julienmonnier
+ * Sends heartbeat request to the LMAX platform at regular intervals
+ * during the trading session to avoid LMAX automatically disconnecting
+ * session if account is inactive (i.e only streaming prices) for more than 5 minutes
+ */
 public class HeartBeatHandler implements HeartbeatEventListener, Runnable {
 
 	
@@ -50,7 +56,7 @@ public class HeartBeatHandler implements HeartbeatEventListener, Runnable {
 		System.out.println("starting heartbeat thread");
         while (!Thread.currentThread().isInterrupted()) {
         	try {
-        		Thread.sleep(10000);
+        		Thread.sleep(60000);
         		requestHeartbeat();
         	} catch (InterruptedException e) {
         	}

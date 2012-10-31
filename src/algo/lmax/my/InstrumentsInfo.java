@@ -15,14 +15,10 @@ import com.lmax.api.FixedPointNumber;
 public class InstrumentsInfo {
 
 	/**
-	 * Couple of important notes:
-	 * 1 - This class is a singleton
-	 * 2 - The methods that access the HashMaps (the accessors) are all static
-	 * 3 - For performance reason the static accessors do not check
-	 * if the HashMaps exist. 
-	 * 4 - As a result this class must be instantiated at least once
-	 * before the static accessors can be used otherwise an
-	 * exception will be thrown
+	 * Creates lists that contain LMAX
+	 * intruments information and provides
+	 * static public accesors to retrieve that
+	 * information
 	 */
 
 	// Main List
@@ -63,6 +59,10 @@ public class InstrumentsInfo {
 		// TODO implements
 	}
 
+	
+	// hashmaps that contains instruments names and ID
+	// are created to allow quick retrival of
+	// instruments details during live trading
 	private static void createHashMaps() {
 
 		instrumentsByName = new HashMap<String, String[]>();

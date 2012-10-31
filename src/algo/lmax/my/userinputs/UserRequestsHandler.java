@@ -17,6 +17,15 @@ import com.lmax.api.account.AccountStateEventListener;
 import com.lmax.api.account.AccountStateRequest;
 import com.lmax.api.orderbook.OrderBookSubscriptionRequest;
 
+/**
+ * @author julienmonnier
+ * Processes user instructions received from UserInputsHandlerImpl class
+ * that concern order execution, general instruments and account admin task
+ * 
+ * TODO implement order execution
+ * 		implement flexi search of instruments
+ * 		implement add from list of all instruments (use regexp 
+ */
 public class UserRequestsHandler implements AccountStateEventListener, UserInstrumentEventsListener {
 	
 

@@ -2,6 +2,12 @@ package algo.lmax.my.userinputs;
 
 import java.util.Scanner;
 
+/**
+ * @author julienmonnier
+ * Takes user inputs from stdin and forward the instructions
+ * to the UserInputsHandlerImpl class for further dispatching
+ * to listening objects
+ */
 public class UserInput implements Runnable {
 
 	private Scanner sc;

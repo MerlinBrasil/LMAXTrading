@@ -5,6 +5,16 @@ package algo.lmax.my;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
+
+
+
+
+/**
+ * @author julienmonnier
+ * This class will be used to output order book events
+ * and other events comming from the exchange
+ * currently those event are output on stdout
+ */
 public class TextAreaFrame {
  
    JTextArea textArea = null;

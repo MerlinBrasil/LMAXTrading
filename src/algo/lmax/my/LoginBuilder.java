@@ -18,6 +18,21 @@ import algo.lmax.my.userinputs.UserInputsHandler;
 import algo.lmax.my.userinputs.UserInputsHandlerImpl;
 import algo.lmax.my.userinputs.UserLoginEventsListener;
 
+/**
+ * @author julienmonnier
+ * Handles the setup process of user login credentials
+ * User login setup requires providing
+ * a login enviro first and then providing a password (a third step is
+ * then automatically triggered to set up the final login
+ * credentials object).
+ * The main method in this class is login. This method 
+ * is called at each stage of the login process, hence
+ * it is called at least twice.
+ * This method calls three methods one after the other. 
+ * A loginlevel variable is used by each of those three methods 
+ * to determine which stage in the login 
+ * process we are at and hence what to do.
+ */
 public final class LoginBuilder implements UserLoginEventsListener {
 
 // instance fields
@@ -40,7 +55,6 @@ public final class LoginBuilder implements UserLoginEventsListener {
         "CFD_LIVE"};
 	
 	
-
 	/**
 	 * Registers this class to receive uihandler's user login events
 	 */
@@ -60,22 +74,10 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		loginlock.unlock();
 	}
 	
-	
-	
-	
 	/**
-	 * Handles the setup process of user login credentials
-	 * User login setup requires providing
-	 * a login enviro first and then providing a password (a third step is
-	 * then automatically triggered to set up the final login
-	 * credentials object).
-	 * This method is called at each stage of the process, hence
-	 * it is called at least twice.
-	 * This method calls three methods in turn. A loginlevel variable is used 
-	 * by each of those methods to determine at which stage in the login 
-	 * process we are and hence what to do.
+	 * See description in class doc above
 	 * 
-	 * @param inputarray - see notify above
+	 * @param inputarray - see notify method above
 	 */
 	private void login(String[] inputarray) {
 		setLoginEnviron(inputarray);
@@ -134,11 +136,11 @@ public final class LoginBuilder implements UserLoginEventsListener {
 	/**
 	 * @author julienmonnier
 	 * Handles default login process.
-	 * This thread waits 6 seconds after which
-	 * it sets the login enviro automatically (currently it is 'test')
-	 * and calls the normal login process.
+	 * This thread waits 6 seconds, after which
+	 * it sets the default login enviro automatically (currently it is 'test')
+	 * and calls the normal login process, which will prompt for a password.
 	 * If the user has already chosen the login enviro manually
-	 * this thread takes no action
+	 * this thread dies after 6 seconds with no effect
 	 */
 	private class DefaultLogin implements Runnable {
 		@Override
@@ -146,10 +148,12 @@ public final class LoginBuilder implements UserLoginEventsListener {
 			try {
 				Thread.sleep(6000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			loginlock.lock();			
+			loginlock.lock();
+			// a login level other than 0 means that the manual login
+			// process is on going and hence the thread skips the
+			// block i.e. the default login does not occur
 			if (loginlevel == 0) {
 				String[] defaultenviro = new String[1];
 				defaultenviro[0] = "test";
@@ -157,7 +161,6 @@ public final class LoginBuilder implements UserLoginEventsListener {
 				try {
 					Thread.sleep(700);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				login(defaultenviro);
@@ -166,6 +169,7 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		}
 	}
 
+	
 	private void startLoginCreation() {
 		(new Thread(new DefaultLogin())).start();
 		System.out.println("Please enter your login");
@@ -179,13 +183,14 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		}
 	}
 	
-	
+	// this method is called by the client to retrieve the login info
+	// the first time this method is called triggers the login
+	// process.
 	public static LoginInfo getLoginDetails(UserInputsHandler uihandler) {
 		if(logininfo == null)
 			new LoginBuilder(uihandler).startLoginCreation();
 		return logininfo;
 	}
-
 }
 
 
