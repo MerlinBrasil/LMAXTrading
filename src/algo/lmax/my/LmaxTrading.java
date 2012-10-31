@@ -83,7 +83,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     @Override
     public void notify(OrderBookEvent orderBookEvent)
     {
-        System.out.println(InstrumentsInfo.getName.ByID(String.valueOf(orderBookEvent.getInstrumentId()))
+        System.out.println(InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()))
         		+ " " + orderBookEvent.getLastTradedPrice().toString());
 
         // React to price updates from the exchange.
@@ -154,8 +154,8 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         // see class doc for more info
 
         InstrumentsInfo.loadInstruments();
-        LmaxTrading trackInstruments = new LmaxTrading(InstrumentsInfo.getID.ByName("EURUSD"), 
-        		InstrumentsInfo.getTickSize.byName("EURUSD"), InstrumentsInfo.getName.ByName("EURUSD"));
+        LmaxTrading trackInstruments = new LmaxTrading(InstrumentsInfo.getID.byName("EURUSD"), 
+        		InstrumentsInfo.getTickSize.byName("EURUSD"), InstrumentsInfo.getSymbol.byName("EURUSD"));
 
         // trackInstruments is passed so that the API can callback our onLoginSuccess or onLoginFailure methods
         lmaxApi.login(new LoginRequest(username, password, productType), trackInstruments);
