@@ -94,7 +94,7 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 			String instru = i[1];
 			if (instru.equals("USDJPY") || instru.equals("USDSGD") || instru.equals("EURUSD")) {
 
-		        session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.ByName(instru)), 
+		        session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(instru)), 
 		        		new DefaultSubscriptionCallback(instru));
 			}
 
