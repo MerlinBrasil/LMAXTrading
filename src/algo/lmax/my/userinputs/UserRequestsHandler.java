@@ -22,9 +22,10 @@ import com.lmax.api.orderbook.OrderBookSubscriptionRequest;
  * Processes user instructions received from UserInputsHandlerImpl class
  * that concern order execution, general instruments and account admin task
  * 
- * TODO implement order execution
- * 		implement flexi search of instruments
- * 		implement add from list of all instruments (use regexp 
+ * TODO implement order execution (use own class as needs to be accessed by other
+ * classes in future.)
+ * 		implement flexi search of instruments (use regexp)
+ * 		implement 'add new intrument' feature from list of all instruments 
  */
 public class UserRequestsHandler implements AccountStateEventListener, UserInstrumentEventsListener {
 	
@@ -46,7 +47,7 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 	// the user instrument instruction event channel
 	@Override
 	public void notify(String[] inputarray) {
-		instructionReceived(inputarray);
+		newInstruction(inputarray);
 	}
 	
     @Override
@@ -64,11 +65,29 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 
     
 
-	private void instructionReceived(String[] inputarray) {
+	private void newInstruction(String[] inputarray) {
 		String[] i = inputarray;
 		String baseintruction = i[0];
 		
-    	if (baseintruction.equals("stop")) {
+    	if (i.length > 1) {
+			String instruction1 = i[1];
+			if (baseintruction.equals("add") && isInstru(instruction1)) {
+		        session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(instruction1)), 
+		        		new DefaultSubscriptionCallback(instruction1));
+			}
+			// make second condition regexp 'instru*'
+			else if (baseintruction.equals("show") && instruction1.equals("instru")) {
+				// printout instru list by name and Lmax Symbol
+			} 
+			else if (baseintruction.equals("acc")) {
+				// NOTE this call will trigger a callback of the
+				// notify method of the AccountStateEventListener
+					session.requestAccountState(new AccountStateRequest(), new Callback() {	
+						@Override public void onSuccess() {}
+						@Override public void onFailure(FailureResponse failureResponse) {}
+					});
+			}
+		} else if (baseintruction.equals("stop")) {
     		System.out.println("stop session listeners");    		
     		// TODO seems to block after market is closed
     		session.stop();
@@ -94,28 +113,16 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 				public void onFailure(FailureResponse failureResponse) {
 					System.out.println(failureResponse.toString());
 				}
-			});
-			
+			});	
+		}
+	}
 
-			
 
-		} else if (baseintruction.equals("add")) {
-			String instru = i[1];
-			if (instru.equals("USDJPY") || instru.equals("USDSGD") || instru.equals("EURUSD")) {
-
-		        session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(instru)), 
-		        		new DefaultSubscriptionCallback(instru));
-			}
-
-		
-		} else if (baseintruction.equals("acc")) {
-			// NOTE this call will trigger a callback of the
-			// notify method of the AccountStateEventListener
-				session.requestAccountState(new AccountStateRequest(), new Callback() {	
-					@Override public void onSuccess() {}
-					@Override public void onFailure(FailureResponse failureResponse) {}
-				});
-		}	
+	// checks whether the argument matches an LMAX instrument name
+	private boolean isInstru(String instru) {
+		if((InstrumentsInfo.getID.byName(instru)).equals(null))
+			return false;
+		return true;
 	}
 }
 	

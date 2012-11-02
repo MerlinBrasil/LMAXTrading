@@ -38,6 +38,28 @@ import com.lmax.api.orderbook.PricePoint;
 import com.lmax.api.reject.InstructionRejectedEvent;
 import com.lmax.api.reject.InstructionRejectedEventListener;
 
+/**
+ * @author julienmonnier
+ * This is the main class from where the program gets started
+ * the main method initiates the following phases
+ * in order:
+ * instantiate a user inputs handler object
+ * get login credentials
+ * load instruments lists
+ * create a new LMAX api login call, passing it an instance
+ * of this class
+ * 
+ * the last phase in turn triggers a callback of the onLoginSuccess method
+ * which provides a session object.  This session object is then
+ * used to register this class to asynchronous events comming from the exchange.
+ * once this is done, the session is started which in turns kicks the
+ * process of listening and processing the info coming from the exchange
+ * 
+ * User interaction is possible during the life of the session
+ * This interaction is handled by the UserInputHandler object
+ * created in the initialization phases.
+ * 
+ */
 public class LmaxTrading implements LoginCallback, OrderBookEventListener
 {
 
@@ -63,21 +85,6 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         this.instrumentName = instrumentName;
     }
 
-    
-    /**
-    *	below runs as separate thread
-    *	currently does the following:
-    *		- sends heartbeat event to exchange to keep session alive
-    */
-    
-    public void parallelProcesses()
-    {
-    	new Thread(new HeartBeatHandler(session)).start();
-
-		// spawning new thread to read user inputs
-		new UserRequestsHandler(session, uihandler);
-    }      
-    
 
     
     @Override
@@ -97,6 +104,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     @Override
     public void onLoginSuccess(Session session)
     {
+    	
         System.out.println("My accountId is: " + session.getAccountDetails().getAccountId());
 
         // Hold onto the session for later use.
@@ -104,6 +112,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 
         // Add a listener for order book events.
         session.registerOrderBookEventListener(this);
+        
         // session.registerOrderEventListener(this);
         // session.registerInstructionRejectedEventListener(this);
 
@@ -113,8 +122,13 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 
         session.subscribe(new OrderBookSubscriptionRequest(instrumentId), new DefaultSubscriptionCallback(instrumentName));
 
-        // run threaded processes, including heartbeats and user inputs threads
-        parallelProcesses();        
+        // keep session alive process (sends heartbeat requests to platform)
+    	new Thread(new HeartBeatHandler(session)).start();
+
+		// creating a new object to read user inputs relating to instruments
+    	// and account admin requests (like adding a new instrument to the tracked
+    	// instruments.)
+		new UserRequestsHandler(session, uihandler);       
         
         // Start the event processing loop, this method will block until the session is stopped.
         session.start();
@@ -161,25 +175,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         lmaxApi.login(new LoginRequest(username, password, productType), trackInstruments);
 
     }
-
-    
-	private void requestHeartbeat()
-    {
-        session.requestHeartbeat(new HeartbeatRequest("token"), new HeartbeatCallback()
-        {
-            @Override
-            public void onSuccess(String token)
-            {
-                System.out.println("Requested heartbeat: " + token);
-            }
-            
-            @Override
-            public void onFailure(FailureResponse failureResponse)
-            {
-                throw new RuntimeException("Failed");
-            }
-        });
-    }        
+      
     
     private static class OrderTracker
     {

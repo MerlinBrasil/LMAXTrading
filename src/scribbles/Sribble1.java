@@ -1,8 +1,8 @@
-package algo.lmax.my.testcode;
+package scribbles;
 
 import java.util.Iterator;
 
-public class TestClass {
+public class Sribble1 {
 
 	int i = 10; // the number of thread to create
 	
@@ -25,9 +25,9 @@ public class TestClass {
 	
 	class ThreadClass implements Runnable {
 		
-		TestClass q;
+		Sribble1 q;
 		
-		ThreadClass(TestClass q) { 
+		ThreadClass(Sribble1 q) { 
 			this.q = q; 
 			new Thread(this).start();
 			}
@@ -40,7 +40,7 @@ public class TestClass {
 	
 	public static void main(String[] args) throws InterruptedException {
 
-		TestClass q = new TestClass();
+		Sribble1 q = new Sribble1();
 		int i = q.i;
 		
 		

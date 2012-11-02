@@ -21,17 +21,25 @@ import algo.lmax.my.userinputs.UserLoginEventsListener;
 /**
  * @author julienmonnier
  * Handles the setup process of user login credentials
- * User login setup requires providing
- * a login enviro first and then providing a password (a third step is
+ * User login setup requires the user to provide
+ * a login environment first and then a password (a third step is
  * then automatically triggered to set up the final login
  * credentials object).
  * The main method in this class is login. This method 
  * is called at each stage of the login process, hence
  * it is called at least twice.
- * This method calls three methods one after the other. 
- * A loginlevel variable is used by each of those three methods 
- * to determine which stage in the login 
+ * login calls three methods one after the other where a variable
+ * called loginstage is used by each of those three methods 
+ * to determine at which stage in the login 
  * process we are at and hence what to do.
+ * A default login thread is spawn by the login process to
+ * set a default environment variable after a set period of
+ * time if the user does not do so manually (the default environment
+ * variable is currently set to 'test'.
+ * 
+ * getLoginDetails is the static public method for getting
+ * the login details.
+ * 
  */
 public final class LoginBuilder implements UserLoginEventsListener {
 
@@ -41,7 +49,7 @@ public final class LoginBuilder implements UserLoginEventsListener {
 	private String loginenviro;
 	private Lock loginlock = new ReentrantLock();
 	private boolean issetlogin = false;
-	private int loginlevel = 0;
+	private int loginstage = 0;
 	private String password = null;
 	private String[] finallogin = null;
 	// TODO store those values in a text file or db
@@ -86,10 +94,10 @@ public final class LoginBuilder implements UserLoginEventsListener {
 	}
 
 	private void setLoginEnviron(String[] inputarray) {
-		if (loginlevel == 0) {
+		if (loginstage == 0) {
 			if(inputarray[0].equals("live") || inputarray[0].equals("test")){
 				loginenviro = inputarray[0];
-				++ loginlevel;
+				++ loginstage;
 			} else { System.out.println("please provide correct login enviro: " +
 					"live or test");
 			}
@@ -97,19 +105,19 @@ public final class LoginBuilder implements UserLoginEventsListener {
 	}
 	
 	private void setPassword(String[] inputarray) {
-		if (loginlevel == 1)
+		if (loginstage == 1)
 			System.out.println("Please enter " + loginenviro + " password");
 		
-		if (loginlevel == 2) {
+		if (loginstage == 2) {
 			password = inputarray[0];
 			testlogin[2] = password;
 			livelogin[2] = password;
 		}
-		++ loginlevel;
+		++ loginstage;
 	}
 	
 	private void setFinalLogin() {
-		if (loginlevel==3) {
+		if (loginstage==3) {
 			if (loginenviro.equals("live")) {
 				finallogin = livelogin;
 			} else if (loginenviro.equals("test")) {
@@ -154,7 +162,7 @@ public final class LoginBuilder implements UserLoginEventsListener {
 			// a login level other than 0 means that the manual login
 			// process is on going and hence the thread skips the
 			// block i.e. the default login does not occur
-			if (loginlevel == 0) {
+			if (loginstage == 0) {
 				String[] defaultenviro = new String[1];
 				defaultenviro[0] = "test";
 				System.out.println("Setting " + defaultenviro[0] + " login environ ...");

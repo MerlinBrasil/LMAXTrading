@@ -6,7 +6,7 @@ import com.lmax.api.FailureResponse;
 /**
  * @author julienmonnier
  * This class is used by several classes, hence
- * the choice of puting it in its own class file
+ * the choice of putting it in its own class file
  * rather than implementing it several times as
  * inner class
  */

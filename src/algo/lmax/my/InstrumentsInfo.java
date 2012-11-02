@@ -1,6 +1,5 @@
 package algo.lmax.my;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,46 +11,78 @@ import java.util.Map;
 
 import com.lmax.api.FixedPointNumber;
 
+/**
+ * @author julienmonnier
+ * Creates lists that hold LMAX-listed instruments description
+ * and provides static public accessors to retrieve that data.
+ * The lists need to be initialised before they can be accessed
+ * for the first time by calling the loadInstruments static method
+ * 
+ * TODO create method to ensure field name changes
+ * in the csv file are captured during load process
+ */
 public class InstrumentsInfo {
 
-	/**
-	 * Creates lists that contain LMAX
-	 * intruments information and provides
-	 * static public accesors to retrieve that
-	 * information
-	 */
-
 	// Main List
-	// structure is as follow:
-	// uiinstruname, Instru Name, LMAX Symbol, ID, multiplier, tick size, tick value, quoted ccy
+	// instruinfo holds the following LMAX instruments information (in this order):
+	// uiinstruname (see makeInstruList method for details), Instrument Name,LMAX ID,LMAX symbol ,Contract Multiplier,
+	// Tick Size,Tick Value, Effective Date,Expiry Date,Quoted CCY
 	private static List<String[]> instruinfo = null;
 
+	// the following HashMaps are created for fast information retrieval
+	// ByName in the list name indicates that the key is the 
+	// name of the instrument (the uiinstruname)
 	private static HashMap<String,String[]> instrumentsByName = null;
 	private static HashMap<String,String[]> instrumentsByID = null;
 
 
 
+	// public accessors
 	public static class getSymbol {
-		public static String byID(String key) {
-			return (String) ((String[]) instrumentsByID.get(key))[2];
-		}
+
 		public static String byName(String key) {
-			return (String) ((String[]) instrumentsByName.get(key))[2];
+			String[] returnval;
+			if (!((returnval = instrumentsByName.get(key)) == null)) {
+				return (String) ((String[]) instrumentsByName.get(key))[3];
+				}
+			return null;
+		}
+	
+		public static String byID(String key) {
+			String[] returnval;
+			if (!((returnval = instrumentsByID.get(key)) == null)) {
+				return (String) ((String[]) returnval)[3];
+			}
+			return null;
 		}
 	}
 
 	public static class getID {
 		public static Long byName(String key) {
-			return Long.valueOf((String) ((String[]) instrumentsByName.get(key))[2]);
+			String[] returnval;
+			if (!((returnval = instrumentsByName.get(key)) == null)) {
+				return Long.valueOf((String) ((String[]) returnval)[2]);
+			}
+			return null;
 		}
-	}	
+	}
 
+	
 	public static class getTickSize {
 		public static FixedPointNumber byName(String key) {
-			return FixedPointNumber.valueOf((String) ((String[]) instrumentsByName.get(key))[5]);
+			String[] returnval;
+			if (!((returnval = instrumentsByName.get(key)) == null)) {
+				return FixedPointNumber.valueOf((String) ((String[]) returnval)[5]);
+			}
+			return null;
 		}
+		
 		public static FixedPointNumber byID(String key) {
-			return FixedPointNumber.valueOf((String) ((String[]) instrumentsByID.get(key))[5]);
+			String[] returnval;
+			if (!((returnval = instrumentsByID.get(key)) == null)) {
+				return FixedPointNumber.valueOf((String) ((String[]) returnval)[5]);
+			}
+			return null;
 		}
 	}
 
@@ -60,25 +91,25 @@ public class InstrumentsInfo {
 	}
 
 	
-	// hashmaps that contains instruments names and ID
-	// are created to allow quick retrival of
-	// instruments details during live trading
+
 	private static void createHashMaps() {
 
 		instrumentsByName = new HashMap<String, String[]>();
 		instrumentsByID = new HashMap<String, String[]>();
 
 		for (Iterator<String[]> iterator = instruinfo.iterator(); iterator.hasNext();) {
-			String[] type = iterator.next();
-			instrumentsByName.put(type[0], type);
-			instrumentsByID.put(type[2], type);
+			String[] e = iterator.next();
+			// uiinstruname is used as key
+			instrumentsByName.put(e[0], e);
+			// LMAX ID is used as key
+			instrumentsByID.put(e[2], e);
 		}
 	}
 
 	private static void makeInstruList() {
 
-		instruinfo = new ArrayList<String[]>();
 		List<String> instruinfotp = new ArrayList<String>();
+		instruinfo = new ArrayList<String[]>();
 		
 		try {
 			BufferedReader f = new BufferedReader(new FileReader("LMAX-Instruments.csv"));
@@ -95,8 +126,9 @@ public class InstrumentsInfo {
 
 		for (Iterator<String> iterator = instruinfotp.iterator(); iterator.hasNext();) {
 
+
 			String[] i = (iterator.next()).split(",");
-			// concatenate instru name whitout "/" for easy user input
+			// concatenate Instrument Name whitout "/" for easy user input
 			String[] j = i[2].split("/");
 			String uiinstruname;
 			if (j.length == 2) {
@@ -104,8 +136,9 @@ public class InstrumentsInfo {
 			} else {
 				uiinstruname = j[0];
 			}
-
-			String[] ifinal = {uiinstruname,i[0],i[1],i[2],i[3],i[4],i[5],i[8]};
+			
+			// keep all fields + uiinstruname into final list element
+			String[] ifinal = {uiinstruname,i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8]};
 
 			instruinfo.add(ifinal);
 		}
