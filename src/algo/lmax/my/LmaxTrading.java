@@ -39,26 +39,25 @@ import com.lmax.api.reject.InstructionRejectedEvent;
 import com.lmax.api.reject.InstructionRejectedEventListener;
 
 /**
- * @author julienmonnier
- * This is the main class from where the program gets started
- * the main method initiates the following phases
+ * This is the main class from where the program is started.
+ * <p>the <tt>main</tt> method initiates the following phases
  * in order:
- * instantiate a user inputs handler object
- * get login credentials
- * load instruments lists
- * create a new LMAX api login call, passing it an instance
+ * <ul>
+ * <li>instantiate a user inputs handler object
+ * <li>get login credentials
+ * <li>load instruments lists
+ * <li>create a new LMAX api login call, passing it an instance
  * of this class
+ * </ul>
+ * the last phase triggers a callback of {@link #onLoginSuccess},
+ * which provides us with a {@link com.lmax.api.Session session} object.
+ * This <tt>session</tt> object is then used to register this class for various
+ * asynchronous events updates coming from the exchange and from the user inputs
+ * events channel handled by {@link UserInputsHandlerImpl}.
+ * <p>Once this is done, the session is started and kicks the
+ * process of listening and processing the asynchronous events.
  * 
- * the last phase in turn triggers a callback of the onLoginSuccess method
- * which provides a session object.  This session object is then
- * used to register this class to asynchronous events comming from the exchange.
- * once this is done, the session is started which in turns kicks the
- * process of listening and processing the info coming from the exchange
- * 
- * User interaction is possible during the life of the session
- * This interaction is handled by the UserInputHandler object
- * created in the initialization phases.
- * 
+ * @author julienmonnier
  */
 public class LmaxTrading implements LoginCallback, OrderBookEventListener
 {

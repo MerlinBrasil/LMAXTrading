@@ -9,10 +9,11 @@ import com.lmax.api.heartbeat.HeartbeatRequest;
 import com.lmax.api.heartbeat.HeartbeatSubscriptionRequest;
 
 /**
+ * Sends heartbeat requests to the LMAX platform at regular intervals of
+ * time during the life of the trading session to avoid automatic disconnection
+ * if inactive (for example if only streaming prices) for a long (5minutes)
+ * period of time.
  * @author julienmonnier
- * Sends heartbeat request to the LMAX platform at regular intervals
- * during the trading session to avoid LMAX automatically disconnecting
- * session if account is inactive (i.e only streaming prices) for more than 5 minutes
  */
 public class HeartBeatHandler implements HeartbeatEventListener, Runnable {
 

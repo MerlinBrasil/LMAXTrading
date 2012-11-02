@@ -19,31 +19,30 @@ import algo.lmax.my.userinputs.UserInputsHandlerImpl;
 import algo.lmax.my.userinputs.UserLoginEventsListener;
 
 /**
- * @author julienmonnier
  * Handles the setup process of user login credentials
  * User login setup requires the user to provide
  * a login environment first and then a password (a third step is
  * then automatically triggered to set up the final login
  * credentials object).
- * The main method in this class is login. This method 
+ * The main method in this class is {@link #login}. This method 
  * is called at each stage of the login process, hence
  * it is called at least twice.
- * login calls three methods one after the other where a variable
- * called loginstage is used by each of those three methods 
- * to determine at which stage in the login 
+ * {@code login} calls three methods in turn.  Each of those three methods
+ * use the {@link #loginstage} variable to determine at which stage in the login 
  * process we are at and hence what to do.
- * A default login thread is spawn by the login process to
- * set a default environment variable after a set period of
- * time if the user does not do so manually (the default environment
- * variable is currently set to 'test'.
  * 
- * getLoginDetails is the static public method for getting
+ * <p>A {@code DefaultLogin} thread is spawn at the start of the login credentials
+ * creation process in {@link #startLoginCreation()}. This thread sets a default 
+ * environment variable after a set period of time if the user does not do so 
+ * manually (the default environment variable is currently set to 'test').
+ * 
+ * <p>{@link #getLoginDetails} is the static public method for getting
  * the login details.
  * 
+ * @author julienmonnier
  */
 public final class LoginBuilder implements UserLoginEventsListener {
 
-// instance fields
 
 	private static LoginInfo logininfo = null;
 	private String loginenviro;
@@ -70,9 +69,6 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		uihandler.registerUserLoginEvents(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see algo.lmax.my.userinputs.UserLoginEventsListener#notify(java.lang.String[])
-	 */
 	@Override
 	public void notify(String[] inputarray) {
 		loginlock.lock();
@@ -82,10 +78,8 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		loginlock.unlock();
 	}
 	
-	/**
-	 * See description in class doc above
-	 * 
-	 * @param inputarray - see notify method above
+	/** 
+	 * @param inputarray - see {@link #notify}
 	 */
 	private void login(String[] inputarray) {
 		setLoginEnviron(inputarray);
@@ -191,9 +185,16 @@ public final class LoginBuilder implements UserLoginEventsListener {
 		}
 	}
 	
-	// this method is called by the client to retrieve the login info
-	// the first time this method is called triggers the login
-	// process.
+
+	/**
+	 * Called by the client to retrieve the {@link #LoginInfo} object.
+	 * The first time this method is called, it triggers the login
+	 * credentials creation process.
+	 * @param uihandler the user instructions event propagator
+	 * @return
+	 * @see #UserInputsHandler
+	 * @see #startLoginCreation
+	 */
 	public static LoginInfo getLoginDetails(UserInputsHandler uihandler) {
 		if(logininfo == null)
 			new LoginBuilder(uihandler).startLoginCreation();

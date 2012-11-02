@@ -1,14 +1,18 @@
 package algo.lmax.my;
 
+import algo.lmax.my.userinputs.UserInputsHandler;
+
 import com.lmax.api.Callback;
 import com.lmax.api.FailureResponse;
 
 /**
+ * Provides implementation of Callback interface
+ * for event registration methods used in other
+ * parts of the code.
+ * 
+ * @see {@link UserInputsHandler}, {@link LmaxTrading}
+ * 
  * @author julienmonnier
- * This class is used by several classes, hence
- * the choice of putting it in its own class file
- * rather than implementing it several times as
- * inner class
  */
 public final class DefaultSubscriptionCallback implements Callback
 {

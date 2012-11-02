@@ -11,22 +11,35 @@ import java.util.Map;
 
 import com.lmax.api.FixedPointNumber;
 
+
+
+
+
 /**
- * @author julienmonnier
  * Creates lists that hold LMAX-listed instruments description
  * and provides static public accessors to retrieve that data.
  * The lists need to be initialised before they can be accessed
  * for the first time by calling the loadInstruments static method
  * 
- * TODO create method to ensure field name changes
- * in the csv file are captured during load process
+ * @author julienmonnier
+ * 
  */
-public class InstrumentsInfo {
 
-	// Main List
-	// instruinfo holds the following LMAX instruments information (in this order):
-	// uiinstruname (see makeInstruList method for details), Instrument Name,LMAX ID,LMAX symbol ,Contract Multiplier,
-	// Tick Size,Tick Value, Effective Date,Expiry Date,Quoted CCY
+public class InstrumentsInfo {
+	
+	// TODO create method to ensure field name changes
+	// in the csv file are captured during load process
+	
+	
+
+	/**
+	 * The primary List.
+	 * <p><code>instruinfo</code> holds the following LMAX instruments information (in this order):
+	 * <p><ul><li>uiinstruname (see makeInstruList method for details)
+	 * <li>Instrument Name <li>LMAX ID <li>LMAX symbol <li>Contract Multiplier
+	 * <li>Tick Size <li>Tick Value <li>Effective Date <li>Expiry Date <li>Quoted CCY
+	 * </ul>
+	 */
 	private static List<String[]> instruinfo = null;
 
 	// the following HashMaps are created for fast information retrieval
@@ -40,6 +53,13 @@ public class InstrumentsInfo {
 	// public accessors
 	public static class getSymbol {
 
+		/**
+		 * returns the LMAX instrument Symbol of the LMAX instrument name
+		 * provided in the <code>key</code>
+		 * <p>returns <code>null</code> if the key is missing in the list
+		 * @param key
+		 * @return LMAX instrument Symbol or <code>null</code>
+		 */
 		public static String byName(String key) {
 			String[] returnval;
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
@@ -47,7 +67,14 @@ public class InstrumentsInfo {
 				}
 			return null;
 		}
-	
+
+		/**
+		 * returns the LMAX instrument Symbol of the LMAX instrument ID
+		 * provided in the <code>key</code>
+		 * <p>returns <code>null</code> if the key is missing in the list
+		 * @param key
+		 * @return LMAX instrument Symbol or <code>null</code>
+		 */
 		public static String byID(String key) {
 			String[] returnval;
 			if (!((returnval = instrumentsByID.get(key)) == null)) {
@@ -57,7 +84,15 @@ public class InstrumentsInfo {
 		}
 	}
 
+
 	public static class getID {
+		/**
+		 * returns the LMAX instrument ID of the LMAX instrument name
+		 * provided in the <code>key</code>
+		 * <p>returns <code>null</code> if the key is missing in the list
+		 * @param key
+		 * @return LMAX instrument ID or <code>null</code>
+		 */
 		public static Long byName(String key) {
 			String[] returnval;
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
@@ -67,8 +102,15 @@ public class InstrumentsInfo {
 		}
 	}
 
-	
+
 	public static class getTickSize {
+		/**
+		 * returns the LMAX instrument TickSize of the LMAX instrument name
+		 * provided in the <code>key</code>
+		 * <p>returns <code>null</code> if the key is missing in the list
+		 * @param key
+		 * @return LMAX instrument TickSize or <code>null</code>
+		 */	
 		public static FixedPointNumber byName(String key) {
 			String[] returnval;
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
@@ -76,7 +118,13 @@ public class InstrumentsInfo {
 			}
 			return null;
 		}
-		
+		/**
+		 * returns the LMAX instrument TickSize of the LMAX instrument ID
+		 * provided in the <code>key</code>
+		 * <p>returns <code>null</code> if the key is missing in the list
+		 * @param key
+		 * @return LMAX instrument TickSize or <code>null</code>
+		 */	
 		public static FixedPointNumber byID(String key) {
 			String[] returnval;
 			if (!((returnval = instrumentsByID.get(key)) == null)) {
@@ -146,6 +194,15 @@ public class InstrumentsInfo {
 		instruinfo.remove(0);
 	}
 	
+	/**
+	 * Kicks the process of loading the information contained
+	 * in the LMAX-Instruments CVS file into a set of lists
+	 * <p>Should be called by the client before calling the lists' getter
+	 * methods for the first time.
+	 * 
+	 * @see {@link #instruinfo}
+	 * @see {@link getSymbol}, {@link getTickSize}, {@link getID}
+	 */
 	public static void loadInstruments() {
 		if (instruinfo == null) {
 			makeInstruList();
