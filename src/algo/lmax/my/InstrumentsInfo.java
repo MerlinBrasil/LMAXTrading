@@ -65,6 +65,7 @@ public class InstrumentsInfo {
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
 				return (String) ((String[]) instrumentsByName.get(key))[3];
 				}
+			keyDoesNotExist(key);
 			return null;
 		}
 
@@ -80,6 +81,7 @@ public class InstrumentsInfo {
 			if (!((returnval = instrumentsByID.get(key)) == null)) {
 				return (String) ((String[]) returnval)[3];
 			}
+			keyDoesNotExist(key);
 			return null;
 		}
 	}
@@ -98,8 +100,10 @@ public class InstrumentsInfo {
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
 				return Long.valueOf((String) ((String[]) returnval)[2]);
 			}
+			keyDoesNotExist(key);
 			return null;
 		}
+
 	}
 
 
@@ -116,6 +120,7 @@ public class InstrumentsInfo {
 			if (!((returnval = instrumentsByName.get(key)) == null)) {
 				return FixedPointNumber.valueOf((String) ((String[]) returnval)[5]);
 			}
+			keyDoesNotExist(key);
 			return null;
 		}
 		/**
@@ -130,12 +135,21 @@ public class InstrumentsInfo {
 			if (!((returnval = instrumentsByID.get(key)) == null)) {
 				return FixedPointNumber.valueOf((String) ((String[]) returnval)[5]);
 			}
+			keyDoesNotExist(key);
 			return null;
 		}
 	}
 
+	private static void keyDoesNotExist(String key) {
+		System.out.println("! " + key + " does not exist");
+	}
+	
 	public static void printAll() {
-		// TODO implements
+		System.out.println("instrument / instrument short name");
+		for (Iterator<String[]> iterator = instruinfo.iterator(); iterator.hasNext();) {
+			String[] info = iterator.next();
+			System.out.println(info[1] + " " + info[0]);
+		}
 	}
 
 	

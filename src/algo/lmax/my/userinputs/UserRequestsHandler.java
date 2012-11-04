@@ -2,6 +2,7 @@ package algo.lmax.my.userinputs;
 
 
 
+import java.util.Iterator;
 import java.util.Scanner;
 
 import algo.lmax.my.DefaultSubscriptionCallback;
@@ -76,8 +77,8 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 		        		new DefaultSubscriptionCallback(instruction1));
 			}
 			// make second condition regexp 'instru*'
-			else if (baseintruction.equals("show") && instruction1.equals("instru")) {
-				// printout instru list by name and Lmax Symbol
+			else if (baseintruction.equals("print") && instruction1.equals("instru")) {
+				InstrumentsInfo.printAll();
 			} 
 			else if (baseintruction.equals("acc")) {
 				// NOTE this call will trigger a callback of the
@@ -120,11 +121,13 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 
 	// checks whether the argument matches an LMAX instrument name
 	private boolean isInstru(String instru) {
-		if((InstrumentsInfo.getID.byName(instru)).equals(null))
+		if(InstrumentsInfo.getID.byName(instru) == null)
 			return false;
 		return true;
 	}
+		
 }
+
 	
 	
 

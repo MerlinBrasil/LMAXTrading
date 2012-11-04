@@ -62,6 +62,7 @@ public class InstrumentsInfoTest {
 			// test by ID
 			assertEquals(null, InstrumentsInfo.getSymbol.byID(testkey));
 			assertEquals(null, InstrumentsInfo.getTickSize.byID(testkey));
+			
 		}
 	}
 }

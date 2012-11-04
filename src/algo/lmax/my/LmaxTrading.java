@@ -9,6 +9,8 @@ import java.util.logging.Logger;
 
 
 import algo.lmax.my.LoginBuilder.LoginInfo;
+import algo.lmax.my.strategies.IsMarketBusy;
+import algo.lmax.my.strategies.Strategy;
 import algo.lmax.my.userinputs.UserInputsHandler;
 import algo.lmax.my.userinputs.UserInputsHandlerImpl;
 import algo.lmax.my.userinputs.UserRequestsHandler;
@@ -25,6 +27,7 @@ import com.lmax.api.heartbeat.HeartbeatCallback;
 import com.lmax.api.heartbeat.HeartbeatEventListener;
 import com.lmax.api.heartbeat.HeartbeatRequest;
 import com.lmax.api.heartbeat.HeartbeatSubscriptionRequest;
+import com.lmax.api.internal.events.OrderBookEventImpl;
 import com.lmax.api.order.CancelOrderRequest;
 import com.lmax.api.order.LimitOrderSpecification;
 import com.lmax.api.order.Order;
@@ -72,6 +75,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     private final long instrumentId;
     private final FixedPointNumber tickSize;
     private final String instrumentName;
+    private Strategy eurusdstrat;
 
     private final OrderTracker buyOrderTracker = new OrderTracker();
     private final OrderTracker sellOrderTracker = new OrderTracker();
@@ -89,9 +93,12 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     @Override
     public void notify(OrderBookEvent orderBookEvent)
     {
-        System.out.println(InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()))
-        		+ " " + orderBookEvent.getLastTradedPrice().toString());
+    	String instruname = InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()));
+        System.out.println(instruname + " " + orderBookEvent.getLastTradedPrice().toString());
 
+        if (instruname.equals("EUR/USD")) {
+			eurusdstrat.notify(orderBookEvent);
+		}
         // React to price updates from the exchange.
         //handleBidPrice(orderBookEvent.getBidPrices());
         //handleAskPrice(orderBookEvent.getAskPrices());
@@ -127,7 +134,10 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 		// creating a new object to read user inputs relating to instruments
     	// and account admin requests (like adding a new instrument to the tracked
     	// instruments.)
-		new UserRequestsHandler(session, uihandler);       
+		new UserRequestsHandler(session, uihandler);    
+		
+		
+		eurusdstrat = new IsMarketBusy();
         
         // Start the event processing loop, this method will block until the session is stopped.
         session.start();
@@ -170,6 +180,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         LmaxTrading trackInstruments = new LmaxTrading(InstrumentsInfo.getID.byName("EURUSD"), 
         		InstrumentsInfo.getTickSize.byName("EURUSD"), InstrumentsInfo.getSymbol.byName("EURUSD"));
 
+        
         // trackInstruments is passed so that the API can callback our onLoginSuccess or onLoginFailure methods
         lmaxApi.login(new LoginRequest(username, password, productType), trackInstruments);
 
