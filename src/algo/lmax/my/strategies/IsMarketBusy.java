@@ -29,13 +29,13 @@ public class IsMarketBusy implements Strategy {
 	 * Contains the difference between the last two traded prices
 	 * for the last twenty one price updates
 	 */
-	MaxList<Long> along = new MaxList<Long>(10);
+	MaxList along = new MaxList(10);
 	
 	/**
 	 * Contains the difference between the last two traded prices
 	 * for the last four price updates
 	 */
-	MaxList<Long> ashort = new MaxList<Long>(3);
+	MaxList ashort = new MaxList(3);
 
 	Long lastprice = null;
 	
@@ -44,34 +44,42 @@ public class IsMarketBusy implements Strategy {
 	 * Gives a list a maximum size provides a MAX_SIZE-aware add
 	 * method
 	 */
-	private class MaxList <T> {
+	private class MaxList {
 		
 		MaxList(int size) {
 			MAX_SIZE = size;
+			list = new long[MAX_SIZE];
 		}
 		int MAX_SIZE;
-		private int index = 0;		
+		long[] list;
+		private int index = 0;
+		boolean isready = false;
 		
-		List<T> list = new ArrayList<T>();
-		
-		public void add(T o) {
-			
+		public void add(long val) {
 			// check if adding a new element to the list
 			// will exceed the maximum size of the list
 			// and remove the first element of the list
 			// if it is the case
-			if((++index) > MAX_SIZE) {
-				list.remove(0);
-				--index;
-			}
-			list.add(o);
-		}
+			
+			if(++index == (MAX_SIZE))
+				index = 0;
 
-		public Iterator<T> iterator() {
-			return list.iterator();
+			if (index == MAX_SIZE-1) {
+				isready = true;
+			}
+			list[index] = val;
+
 		}
-		
-		
+		public double getAverage() {
+			
+			long sum = 0;
+			int i = 0;
+			while(i < MAX_SIZE) {
+				sum += list[i];
+				i++;
+			}
+			return (double) sum/ MAX_SIZE;
+		}
 	}
 	
 	
@@ -87,9 +95,9 @@ public class IsMarketBusy implements Strategy {
 		
 
 		for (int i = 0; i < 100; i++) {
-			
+			long t1 = System.nanoTime();
 			processEvent(orderBookEvent);
-			
+			System.out.println((System.nanoTime()-t1));
 		}
 
 	}
@@ -117,15 +125,15 @@ public class IsMarketBusy implements Strategy {
 		
 		
 		// TODO watch out autoboxing
-		long t1 = System.nanoTime();
+		
 		along.add(var);
-		System.out.println((System.nanoTime()-t1));
+		
 		ashort.add(var);
 		
-		if (along.index == along.MAX_SIZE ) {
+		if (along.isready == true) {
 
-			double longAvg = calcAverage(along);
-			double shortAvg = calcAverage(ashort);
+			double longAvg = along.getAverage();
+			double shortAvg = ashort.getAverage();
 //			System.out.println("short average: " + shortAvg + ", long average: " + longAvg);
 			
 //			for (Iterator iterator = ashort.iterator(); iterator.hasNext();) {
@@ -154,16 +162,6 @@ public class IsMarketBusy implements Strategy {
 		return false;
 	}
 
-	private double calcAverage(MaxList<Long> list) {
-		Long sum = 0L;
-		for (Iterator<Long> iterator = list.iterator(); iterator.hasNext();) {
-			Long e = iterator.next();
-			sum += e;
-		}
-//		System.out.println(sum + "   " + list.MAX_SIZE);
-		return (double) sum/ (double) list.MAX_SIZE;
-		
-	}	
 	public static void main(String[] args) {
 		
 		Strategy strat = new IsMarketBusy();
