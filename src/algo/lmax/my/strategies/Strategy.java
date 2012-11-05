@@ -12,6 +12,13 @@ public interface Strategy {
 	 * @param orderBookEvent an OrderBookEvent object
 	 */
 	void notify(OrderBookEvent orderBookEvent);
+
+	/**
+	 * called when an OrderBookEventProcessor notifies this
+	 * strategy that an new OrderBookEvent is available
+	 * @param orderBookEvent an OrderBookEvent object
+	 */
+	void notify(long price);
 	
 	/**
 	 * Registers for OrderBookEventProcessor notifications

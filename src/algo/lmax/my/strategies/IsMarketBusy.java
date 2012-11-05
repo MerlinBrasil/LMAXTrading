@@ -26,64 +26,87 @@ public class IsMarketBusy implements Strategy {
 //	OrderBookEvent ob;
 	
 	/**
-	 * Contains the difference between the last two traded prices
-	 * for the last twenty one price updates
+	 * Contains values representing the difference between
+	 * the last two traded prices received from the exchange
+	 * It is used to obtain the "longer" average of thos price
+	 * differences
 	 */
-	MaxList along = new MaxList(10);
+	MaxSum along = new MaxSum(10);
 	
 	/**
-	 * Contains the difference between the last two traded prices
-	 * for the last four price updates
+	 * Contains values representing the difference between
+	 * the last two traded prices received from the exchange
+	 * It is used to obtain the "shorter" average of thos price
+	 * differences
 	 */
-	MaxList ashort = new MaxList(3);
+	MaxSum ashort = new MaxSum(2);
 
-	Long lastprice = null;
+	long lastprice = 0;
+	int moveindex = 0;
+	long var;
+	long newp;
+	String msg;
+	double longAvg;
 	
 	
 	/**
-	 * Gives a list a maximum size provides a MAX_SIZE-aware add
-	 * method
+	 * Maintains a sum of long values of up to MAX_SIZE number 
+	 * of values and removes the oldest value from the sum for
+	 * each new value added to the sum after that.
+	 * <p>Provides basic statics on the sum, including the
+	 * sum's average
 	 */
-	private class MaxList {
+	private class MaxSum {
 		
-		MaxList(int size) {
+		MaxSum(int size) {
 			MAX_SIZE = size;
-			list = new long[MAX_SIZE];
+			MAX_SIZE_MINUS_ONE = MAX_SIZE-1;
+			values = new long[MAX_SIZE];
+			// initialize array values to zero
+			for (int i = 0; i < MAX_SIZE_MINUS_ONE; i++) {
+				values[i]=0;
+			}
 		}
-		int MAX_SIZE;
-		long[] list;
-		private int index = 0;
+		
+		final int MAX_SIZE;
+		final int MAX_SIZE_MINUS_ONE;
+		long[] values;
 		boolean isready = false;
 		
-		public void add(long val) {
-			// check if adding a new element to the list
-			// will exceed the maximum size of the list
-			// and remove the first element of the list
-			// if it is the case
-			
-			if(++index == (MAX_SIZE))
-				index = 0;
+		private int index = 0;
+		
+		long sum = 0;
+		
+		public void add(long newprice) {
 
-			if (index == MAX_SIZE-1) {
-				isready = true;
+			if(index > MAX_SIZE_MINUS_ONE) {
+					// reset index to add newprice to begining of
+					// values array
+					isready = true;
+					index = 0;
 			}
-			list[index] = val;
-
+			
+			sum += newprice;
+			
+			// substract oldest value in array from sum
+			sum -= values[(index)];
+			
+			// add new price to list of values, replacing
+			// oldest value
+			values[index] = newprice;
+			
+			++index;
 		}
+		
+		/**
+		 * Calculates the average of <code>sum</code>
+		 * @return the average of <code>sum</code>
+		 */
 		public double getAverage() {
-			
-			long sum = 0;
-			int i = 0;
-			while(i < MAX_SIZE) {
-				sum += list[i];
-				i++;
-			}
-			return (double) sum/ MAX_SIZE;
+
+			return (double) ((sum*100)/ MAX_SIZE)/100;
 		}
 	}
-	
-	
-	
 	
 	@Override
 	public void register(OrderBookEventProcessor orderBookEventProcessor) {
@@ -91,81 +114,40 @@ public class IsMarketBusy implements Strategy {
 	}
 	
 	@Override
-	public void notify(OrderBookEvent orderBookEvent) {
+	public void notify(OrderBookEvent orderBookEven){
+		// not used in this strategy
+	}
+	
+	
+	@Override
+	public void notify(long askprice) {
 		
-
-		for (int i = 0; i < 100; i++) {
-			long t1 = System.nanoTime();
-			processEvent(orderBookEvent);
-			System.out.println((System.nanoTime()-t1));
-		}
-
+		processEvent(askprice);
 	}
 
-	private void processEvent(OrderBookEvent ob) {
-		
-		
-		Long randnum = 1000 + Math.round(Math.random()*25);
-				
+	private void processEvent(long askprice) {
+	
 		// TODO check if big diff between LastTradedPrice and bid/ask prices
-		long var;
-//		Long newp = ob.getLastTradedPrice().longValue();
-		long newp = randnum;
+		// TODO watch out autoboxing
 		
-		if (lastprice == null) {
-			lastprice = newp;
-			return;
-		}
-		
+		newp = askprice;
 		var = Math.abs(newp - lastprice);
-		
-//		System.out.println("new price is " + newp + " / var is " + var);
-		
 		lastprice = newp;
 		
+		longAvg = along.getAverage();
 		
-		// TODO watch out autoboxing
+	
+		System.out.printf("price is "+ newp +", change is " + var + " and ratio is %.2f\n", (double) var/longAvg);
+		
+		if (along.isready && (var > 5 * longAvg)) {
+			++moveindex;
+			if(moveindex>1) {
+				System.out.printf(var +" was a significant price change with a ration of %.2f\n", (double) var/longAvg);
+			}
+
+		} else {moveindex = 0;};
 		
 		along.add(var);
 		
-		ashort.add(var);
-		
-		if (along.isready == true) {
-
-			double longAvg = along.getAverage();
-			double shortAvg = ashort.getAverage();
-//			System.out.println("short average: " + shortAvg + ", long average: " + longAvg);
-			
-//			for (Iterator iterator = ashort.iterator(); iterator.hasNext();) {
-//				Long price = (Long) iterator.next();
-//				System.out.println(price);
-//				
-//			}
-			
-//			System.out.printf("shortAvg = %.2f, longAvg = %.2f",shortAvg,longAvg);
-//			System.out.println();
-			if(isDifferenceMeaningful(longAvg,shortAvg)) {
-				System.out.printf("shortAvg = %.2f, longAvg = %.2f >> short average is %.2f times greater\n",shortAvg,longAvg,shortAvg/longAvg);
-//				System.out.println();				
-//				System.out.println("Last traded price is - " + ob.getLastTradedPrice());
-				return;
-			}
-			
-		}
-		
-	}
-
-	private boolean isDifferenceMeaningful(double longAvg, double shortAvg) {
-		
-		if(shortAvg > 1.6 * longAvg)
-			return true;
-		return false;
-	}
-
-	public static void main(String[] args) {
-		
-		Strategy strat = new IsMarketBusy();
-		OrderBookEvent ob = null;
-		strat.notify(ob);
 	}
 }

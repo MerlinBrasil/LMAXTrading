@@ -93,15 +93,18 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     @Override
     public void notify(OrderBookEvent orderBookEvent)
     {
+    	long t1 = System.nanoTime();
     	String instruname = InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()));
-        System.out.println(instruname + " " + orderBookEvent.getLastTradedPrice().toString());
-
+        
+        long askprice = orderBookEvent.getAskPrices().get(0).getPrice().longValue();
+        
         if (instruname.equals("EUR/USD")) {
-			eurusdstrat.notify(orderBookEvent);
+			eurusdstrat.notify(askprice);
 		}
         // React to price updates from the exchange.
         //handleBidPrice(orderBookEvent.getBidPrices());
         //handleAskPrice(orderBookEvent.getAskPrices());
+        System.out.println("envent was processed in " + (System.nanoTime()-t1)/1000 + " microseconds");
     }
 
 
