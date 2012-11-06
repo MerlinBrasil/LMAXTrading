@@ -93,18 +93,20 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     @Override
     public void notify(OrderBookEvent orderBookEvent)
     {
-    	long t1 = System.nanoTime();
+    	
+//    	long t1 = System.nanoTime();
     	String instruname = InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()));
-        
+//    	System.out.println("event received for "+instruname+", price is "+orderBookEvent.getAskPrices().get(0).getPrice());
+    	
         long askprice = orderBookEvent.getAskPrices().get(0).getPrice().longValue();
         
-        if (instruname.equals("EUR/USD")) {
-			eurusdstrat.notify(askprice);
-		}
+            
+		eurusdstrat.notify(instruname,askprice);
+
         // React to price updates from the exchange.
         //handleBidPrice(orderBookEvent.getBidPrices());
         //handleAskPrice(orderBookEvent.getAskPrices());
-        System.out.println("envent was processed in " + (System.nanoTime()-t1)/1000 + " microseconds");
+//        System.out.println("envent was processed in " + (System.nanoTime()-t1)/1000 + " microseconds");
     }
 
 
@@ -140,7 +142,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 		new UserRequestsHandler(session, uihandler);    
 		
 		
-		eurusdstrat = new IsMarketBusy();
+		eurusdstrat = new IsMarketBusy("EUR/USD");
         
         // Start the event processing loop, this method will block until the session is stopped.
         session.start();

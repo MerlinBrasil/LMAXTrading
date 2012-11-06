@@ -11,14 +11,14 @@ public interface Strategy {
 	 * strategy that an new OrderBookEvent is available
 	 * @param orderBookEvent an OrderBookEvent object
 	 */
-	void notify(OrderBookEvent orderBookEvent);
+	void notify(String instruname, OrderBookEvent orderBookEvent);
 
 	/**
 	 * called when an OrderBookEventProcessor notifies this
 	 * strategy that an new OrderBookEvent is available
 	 * @param orderBookEvent an OrderBookEvent object
 	 */
-	void notify(long price);
+	void notify(String instruname, long price);
 	
 	/**
 	 * Registers for OrderBookEventProcessor notifications
