@@ -3,6 +3,8 @@ package algo.lmax.my;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -76,6 +78,8 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     private final FixedPointNumber tickSize;
     private final String instrumentName;
     private Strategy eurusdstrat;
+    private Strategy oilstrat;
+    List<Strategy> stratlist;
 
     private final OrderTracker buyOrderTracker = new OrderTracker();
     private final OrderTracker sellOrderTracker = new OrderTracker();
@@ -100,9 +104,10 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     	
         long askprice = orderBookEvent.getAskPrices().get(0).getPrice().longValue();
         
-            
-		eurusdstrat.notify(instruname,askprice);
-
+        for (Iterator<Strategy> iterator = stratlist.iterator(); iterator.hasNext();) {
+			iterator.next().notify(instruname,askprice);
+		}
+        
         // React to price updates from the exchange.
         //handleBidPrice(orderBookEvent.getBidPrices());
         //handleAskPrice(orderBookEvent.getAskPrices());
@@ -141,9 +146,17 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     	// instruments.)
 		new UserRequestsHandler(session, uihandler);    
 		
+		session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName("CLZ2")), 
+        		new DefaultSubscriptionCallback("CLZ2"));
 		
 		eurusdstrat = new IsMarketBusy("EUR/USD");
-        
+		oilstrat = new IsMarketBusy("CLZ2");
+		
+		stratlist = new ArrayList<Strategy>();
+		stratlist.add(eurusdstrat);
+		stratlist.add(oilstrat);
+		
+		
         // Start the event processing loop, this method will block until the session is stopped.
         session.start();
     }

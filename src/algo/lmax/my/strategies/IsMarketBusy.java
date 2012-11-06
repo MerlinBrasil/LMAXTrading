@@ -15,7 +15,7 @@ import com.lmax.api.FixedPointNumber;
 import com.lmax.api.orderbook.OrderBookEvent;
 
 /**
- * Determines if the level of activity increases 
+ * Determines if the level of activity increase 
  * in the underlying instrument (for example EUR/USD) 
  * using a time-sensitive and price-sensitive indicator
  * 
@@ -85,7 +85,7 @@ public class IsMarketBusy implements Strategy {
 		// loaded
 		
 		String[] instrus = {"EUR/USD","USD/JPY","CLZ2"};
-		int[] times = {4,3,3};
+		int[] times = {5,4,4};
 		int[] pricechanges = {4,4,3};
 		int[] speedchanges = {times[0]*2+2,times[1]*2+2,times[2]*2+2};
 		
