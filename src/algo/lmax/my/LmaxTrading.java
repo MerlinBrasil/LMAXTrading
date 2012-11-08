@@ -1,13 +1,22 @@
 package algo.lmax.my;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
+
+import javax.swing.plaf.SliderUI;
 
 
 import algo.lmax.my.LoginBuilder.LoginInfo;
@@ -80,7 +89,16 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     private Strategy eurusdstrat;
     private Strategy oilstrat;
     List<Strategy> stratlist;
-
+    public static LinkedList<String> obevents = new LinkedList<String>();
+    public static LinkedList<String> obeventstp = new LinkedList<String>();
+    public static boolean obeventsuse = true;
+    public static boolean obeventstpsizenull = true;
+    public static int obeventsindex = 0;
+    public static long obeventrowindex = 0;
+    public static Lock obeventslock = new ReentrantLock();
+    public static int obeventsstoringindex = 0;
+    
+    
     private final OrderTracker buyOrderTracker = new OrderTracker();
     private final OrderTracker sellOrderTracker = new OrderTracker();
     private Thread heartbeatthread;
@@ -102,6 +120,23 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     	String instruname = InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()));
 //    	System.out.println("event received for "+instruname+", price is "+orderBookEvent.getAskPrices().get(0).getPrice());
     	
+    	
+    	
+    	
+    	//long timepublishedvar = System.currentTimeMillis() - orderBookEvent.getTimeStamp();
+    	
+
+    	
+    	
+
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    			
         long askprice = orderBookEvent.getAskPrices().get(0).getPrice().longValue();
         
         for (Iterator<Strategy> iterator = stratlist.iterator(); iterator.hasNext();) {
@@ -111,10 +146,131 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         // React to price updates from the exchange.
         //handleBidPrice(orderBookEvent.getBidPrices());
         //handleAskPrice(orderBookEvent.getAskPrices());
-//        System.out.println("envent was processed in " + (System.nanoTime()-t1)/1000 + " microseconds");
+        
+    	
+    	
+    	addToList(orderBookEvent);
+//    	System.out.println("envent was processed in " + (System.nanoTime()-t1)/1000 + " microseconds");
+    	
     }
 
 
+    /**
+	* Saves order book events info into a list (the 'main' list). 
+	* once main list has reached a certain size, store its values to a file (file 'A').
+	* The copy to file A process runs in a separate thread. This is to
+	* prevent the system from hanging while the file A is being written
+	* As a result of this process a temporary list takes the new order book
+	* updates coming from the exchange while the main list is being written to file A.
+	* Once the main list is free again, the values in the temp list get written to file A
+	* in a separate thread to avoid the system to hang so main list can take new order book
+	* events update.
+	* 
+	* @param orderBookEvent
+    */
+    private void addToList(OrderBookEvent orderBookEvent) {
+    	
+    	++obeventrowindex;
+    	System.out.println("adding obevent to row: "+obeventrowindex);
+    	String instruname = InstrumentsInfo.getSymbol.byID(String.valueOf(orderBookEvent.getInstrumentId()));
+    	String obevent = (orderBookEvent.toString()+", timereceived="+"'"+System.currentTimeMillis()+"'"+", instruname="+instruname+", obeventrow="+obeventrowindex);
+    	
+    	obeventslock.lock();
+    	// this if condition is true as long as obeventsindex is less than a set
+    	// value (currently 100)
+    	if (obeventsuse && obeventstpsizenull) {
+    		obevents.add(obevent);
+    		++obeventsindex;
+//    		System.out.println("added event to obevents, index is "+obeventsindex);
+    		
+    	
+    	// this is true only once per cycle of storing to file
+		} else if (obeventsuse && !obeventstpsizenull) {
+//			System.out.println("storing obeventsTP to file");
+			new Thread(new StoreOrderBookEventsToFile(obeventstp)).start();
+			// technically it is not yet null as the thread above is still running
+			// but this is necessary to avoid this else if condition true again on the
+			// next price update
+			obeventstpsizenull = true;
+			// statement below is a dup with statement in first if condition above,
+			// need improve the overall if statements logic to avoid
+			// this.
+			obevents.add(obevent);
+			++obeventsindex;
+		// this becomes true as soon as the first if condition becomes false
+		} else {
+			// this assumes that obeventstp is empty by the time this else condition
+			// becomes true.
+//			System.out.println("adding event"+ orderBookEvent.getTimeStamp() +" (time published) to obeventsTP");
+			obeventstp.add(obevent);
+			obeventstpsizenull = false;
+		}
+    	obeventslock.unlock();
+    	
+    	if (!(obeventsindex<500)) {
+    		
+    		System.out.println("now about to write to file");
+    		
+    		obeventsuse = false;
+    		obeventsindex = 0;
+			
+			
+			new Thread(new StoreOrderBookEventsToFile(obevents)).start();
+		}
+		
+	}
+
+
+	public class StoreOrderBookEventsToFile implements Runnable {
+    	
+    	private LinkedList<String> obevents;
+    	
+    	public StoreOrderBookEventsToFile(LinkedList<String> obevents) {
+    		
+    		this.obevents = obevents;
+    		
+    		
+    	}
+    	
+    	
+    	public void run() {
+    		++obeventsstoringindex;
+    		System.out.println("storing index is: "+obeventsstoringindex);
+    		File file = new File("obevents.txt");
+    		// if file doesnt exists, then create it
+    		if (!file.exists()) {
+    			try {
+    				file.createNewFile();
+    			} catch (IOException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+    		}
+    		
+    		try {
+    			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+    			BufferedWriter bw = new BufferedWriter(fw);
+    			
+    			for (Iterator<String> iterator = obevents.iterator(); iterator
+    					.hasNext();) {
+    				bw.write(iterator.next()+"\n");
+    			}
+    			
+    			bw.close();
+    		} catch (IOException e) {}
+    		
+    		obevents.clear();
+    		
+    		if (!obeventsuse) {
+    			obeventslock.lock();
+    			
+    			obeventsuse = true;
+    			obeventslock.unlock();						
+    		}
+
+    		--obeventsstoringindex;
+    	}
+    }
     
     
     @Override
@@ -136,7 +292,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
         // session.subscribe(new OrderSubscriptionRequest(), new DefaultSubscriptionCallback());
         // Subscribe to the order book that I'm interested in
 
-        session.subscribe(new OrderBookSubscriptionRequest(instrumentId), new DefaultSubscriptionCallback(instrumentName));
+ 
 
         // keep session alive process (sends heartbeat requests to platform)
     	new Thread(new HeartBeatHandler(session)).start();
@@ -145,9 +301,14 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     	// and account admin requests (like adding a new instrument to the tracked
     	// instruments.)
 		new UserRequestsHandler(session, uihandler);    
+
 		
-		session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName("CLZ2")), 
-        		new DefaultSubscriptionCallback("CLZ2"));
+		String[] instrutoregister = {"EURUSD","CLZ2"};
+		for (String i : instrutoregister) {
+			session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(i)), 
+					new DefaultSubscriptionCallback(i));
+		}
+
 		
 		eurusdstrat = new IsMarketBusy("EUR/USD");
 		oilstrat = new IsMarketBusy("CLZ2");

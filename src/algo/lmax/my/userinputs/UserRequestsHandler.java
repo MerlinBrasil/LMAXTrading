@@ -2,13 +2,20 @@ package algo.lmax.my.userinputs;
 
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import algo.lmax.my.DefaultSubscriptionCallback;
 import algo.lmax.my.HeartBeatHandler;
 import algo.lmax.my.InstrumentsInfo;
 import algo.lmax.my.InstrumentsInfo.getID;
+import algo.lmax.my.LmaxTrading;
+import algo.lmax.my.StoreOrderBookEventsToFile;
 
 import com.lmax.api.Session;
 import com.lmax.api.Callback;
@@ -107,6 +114,7 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 						e.printStackTrace();
 					}
 					System.out.println(">>>  system will now exit");
+					waitStoringDataFinished(); // blocking method
 					System.exit(0);
 				}
 				
@@ -125,6 +133,91 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 			return false;
 		return true;
 	}
+	
+	private void waitStoringDataFinished() {
+		
+		// when closing the system, either of obevents and
+		// obeventstp need to be writen to file manually
+		// if LmaxTrading.obeventsuse = true then it means
+		// obevents may have some data and needs to be saved
+		// manually AFTER ensuring that obeventstp is empty
+		// if LmaxTrading.obeventsuse = false then it means
+		// obeventstp may have some data and needs to be saved
+		// manually AFTER ensuring that obevents is empty
+		
+		
+		if (LmaxTrading.obeventsuse) {
+		
+			// if above condition is true, it means that
+			// obeventstp is in the process of being written to file
+			// or has already been written to file.  In any case
+			// we need to ensure obeventstp is empty before proceeding
+			// to save obevents manually to file
+			while(LmaxTrading.obeventstp.size()>0){
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			
+			storeToFile(LmaxTrading.obevents);
+			return;
+			
+		}
+		else {
+			
+			// LmaxTrading.obeventsuse is false it means
+			// obevents is in the process of being written to file
+			// or has already been written to file.  In any case
+			// we need to ensure obeventstp is empty before proceeding
+			// to save obeventstp manually to file
+			while(LmaxTrading.obevents.size()>0){
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			storeToFile(LmaxTrading.obeventstp);
+			return;
+			
+		}
+	}
+	
+	
+	private void storeToFile(LinkedList<String> obevents) {
+		File file = new File("obevents.txt");
+		// if file doesnt exists, then create it
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for (Iterator<String> iterator = obevents.iterator(); iterator
+					.hasNext();) {
+				bw.write(iterator.next()+"\n");
+				}
+			
+			bw.close();
+		} catch (IOException e) {}
+		
+		obevents.clear();
+
+	}
+	
+	
 		
 }
 

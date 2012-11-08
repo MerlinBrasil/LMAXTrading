@@ -12,7 +12,10 @@ import org.apache.commons.math3.stat.StatUtils;
 import algo.lmax.my.OrderBookEventProcessor;
 
 import com.lmax.api.FixedPointNumber;
+import com.lmax.api.internal.events.OrderBookEventImpl;
+import com.lmax.api.internal.orderbook.OrderBookInfoImpl;
 import com.lmax.api.orderbook.OrderBookEvent;
+import com.lmax.api.orderbook.OrderBookInfo;
 
 /**
  * Determines if the level of activity increase 
@@ -83,11 +86,11 @@ public class IsMarketBusy implements Strategy {
 		// should be reading static
 		// data and exit early if data already
 		// loaded
-		
+
 		String[] instrus = {"EUR/USD","USD/JPY","CLZ2"};
-		int[] times = {5,4,4};
-		int[] pricechanges = {4,4,3};
-		int[] speedchanges = {times[0]*2+2,times[1]*2+2,times[2]*2+2};
+		int[] times = {5,5,5};
+		int[] pricechanges = {6,6,6};
+		int[] speedchanges = {times[0]*2+3,times[1]*2+3,times[2]*2+3};
 		
 		for (int i = 0; i < instrus.length; i++) {
 			instrutimesize.put(instrus[i], times[i]);
