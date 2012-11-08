@@ -87,10 +87,10 @@ public class IsMarketBusy implements Strategy {
 		// data and exit early if data already
 		// loaded
 
-		String[] instrus = {"EUR/USD","USD/JPY","CLZ2"};
-		int[] times = {5,5,5};
-		int[] pricechanges = {6,6,6};
-		int[] speedchanges = {times[0]*2+3,times[1]*2+3,times[2]*2+3};
+		String[] instrus = {"EUR/USD","USD/JPY","CLZ2","WS30"};
+		int[] times = {5,5,5,5};
+		int[] pricechanges = {6,6,6,6};
+		int[] speedchanges = {times[0]*2+3,times[1]*2+3,times[2]*2+3,times[2]*2+3};
 		
 		for (int i = 0; i < instrus.length; i++) {
 			instrutimesize.put(instrus[i], times[i]);

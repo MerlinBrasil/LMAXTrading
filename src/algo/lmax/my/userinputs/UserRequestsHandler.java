@@ -15,7 +15,6 @@ import algo.lmax.my.HeartBeatHandler;
 import algo.lmax.my.InstrumentsInfo;
 import algo.lmax.my.InstrumentsInfo.getID;
 import algo.lmax.my.LmaxTrading;
-import algo.lmax.my.StoreOrderBookEventsToFile;
 
 import com.lmax.api.Session;
 import com.lmax.api.Callback;
@@ -82,6 +81,7 @@ public class UserRequestsHandler implements AccountStateEventListener, UserInstr
 			if (baseintruction.equals("add") && isInstru(instruction1)) {
 		        session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(instruction1)), 
 		        		new DefaultSubscriptionCallback(instruction1));
+		        
 			}
 			// make second condition regexp 'instru*'
 			else if (baseintruction.equals("print") && instruction1.equals("instru")) {

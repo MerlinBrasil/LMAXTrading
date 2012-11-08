@@ -88,6 +88,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
     private final String instrumentName;
     private Strategy eurusdstrat;
     private Strategy oilstrat;
+    private Strategy ws30strat;
     List<Strategy> stratlist;
     public static LinkedList<String> obevents = new LinkedList<String>();
     public static LinkedList<String> obeventstp = new LinkedList<String>();
@@ -312,11 +313,15 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 		
 		eurusdstrat = new IsMarketBusy("EUR/USD");
 		oilstrat = new IsMarketBusy("CLZ2");
+		// should be created only if instru is being registered for
+		// order book events as for "EURUSD" and "CLZ2" above
+		// need sorting
+		ws30strat = new IsMarketBusy("WS30");
 		
 		stratlist = new ArrayList<Strategy>();
 		stratlist.add(eurusdstrat);
 		stratlist.add(oilstrat);
-		
+		stratlist.add(ws30strat);
 		
         // Start the event processing loop, this method will block until the session is stopped.
         session.start();
