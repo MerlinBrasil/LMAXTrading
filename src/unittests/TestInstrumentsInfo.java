@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import algo.lmax.my.InstrumentsInfo;
 
-public class InstrumentsInfoTest {
+public class TestInstrumentsInfo {
 
 	/**
 	 * Tests that the value returned by each of InstrumentsInfo
