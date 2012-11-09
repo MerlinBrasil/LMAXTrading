@@ -304,7 +304,7 @@ public class LmaxTrading implements LoginCallback, OrderBookEventListener
 		new UserRequestsHandler(session, uihandler);    
 
 		
-		String[] instrutoregister = {"EURUSD","CLZ2"};
+		String[] instrutoregister = {"EURUSD"};
 		for (String i : instrutoregister) {
 			session.subscribe(new OrderBookSubscriptionRequest(InstrumentsInfo.getID.byName(i)), 
 					new DefaultSubscriptionCallback(i));

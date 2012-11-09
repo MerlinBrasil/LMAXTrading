@@ -2,6 +2,16 @@
 Formats the data in obevents.txt for use with spreadsheets 
 and data analysis tools and saves the result in /data/fileout.txt
 
+
+
+TODO 
+    1/ auto rename fileout.txt with name provided as second (optional) argument
+in script and add date time at the beginning of the file name
+    2/ delete data in obevents after file has been succesfully output to outfile.txt
+    (ensure it does not conflict with potential parallel processes that try to write to
+    obevents (like LmaxTrading.java)
+
+
 @author: jule64@gmail.com
 '''
 import re
