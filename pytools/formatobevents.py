@@ -23,11 +23,9 @@ from symbol import if_stmt
 
 class processdata():
     
- 
-    def extractheadersandvalues(self):
-        
-
     
+    def extractheaders(self):
+    # extract headers
     # run below only for the first line in the file
         if self.headerflag:
             
@@ -40,13 +38,27 @@ class processdata():
                 finstrg += strg+','
             
             # remove crappy comma at the end
-            self.line = finstrg[:len(finstrg)-1]
+            self.linetowrite = finstrg[:len(finstrg)-1]
+            
+            self.writetofile()
             
             self.headerflag = False
-            return
+        
+               
+        
+        
+        
+ 
+    def extractvalues(self):
+        
+        # remove single quotes
+        self.line = re.sub(r'\'', '', self.line)
+        
+
+
             
     
-    
+    # extract values
     # run below for ALL the lines in the file
     
         # extract values
@@ -58,9 +70,9 @@ class processdata():
         for strg in linesp:
             finstrg += strg+','
         # remove crappy comma at the end
-        self.line = finstrg[:len(finstrg)-1]
+        self.linetowrite = finstrg[:len(finstrg)-1]
 
-
+        self.writetofile()
 
 
 
@@ -110,58 +122,55 @@ class processdata():
 
     def processfile(self):
         instruidlist = []
-        filelist = []
+        self.filelist = []
         
         
 
         mainfile = open("/Users/julienmonnier/workspace/LMAXTrading/obevents.txt", "r")
         self.line = mainfile.readline()
+        
+        
 
         # main loop.  We are reading the content of mainfile line by line so as
         # to reduce memory footprint and increase reading speed
         while self.line:
             
+            print self.line
             #store content of file in variable
             #TODO check that there is no size limit for the variable
             
             idpat = re.compile(r'\d+')
 
             # Extract security ID of the security
-            instruid = re.search(idpat, self.line).group()
+            self.instruid = re.search(idpat, self.line).group()
             # check if instru ID already in list and if
             # not add it and create a new file in data
-            # folder with name of instruid
-            if instruid not in instruidlist:
-                instruidlist.append(instruid)
+            # folder with name of self.instruid
+            if self.instruid not in instruidlist:
+                instruidlist.append(self.instruid)
                 # create file (if doesn't exist from previous runs
                 # the w+ ensures any data from previous runs is overwritten 
-                instrufile = open('/Users/julienmonnier/workspace/LMAXTrading/data/'+instruid+'.txt', 'w+')
+                instrufile = open('/Users/julienmonnier/workspace/LMAXTrading/data/'+self.instruid+'.txt', 'w+')
                 # add newly open file to a list for data processing in next step
                 # note we add a key value for faster retrieval during data processing
                 # steps
-                filelist.append([instruid,instrufile])
+                self.filelist.append([self.instruid,instrufile])
                 self.headerflag = True
 
             
             
-            self.keepheadersandvaluesonly()
-            self.extractheadersandvalues()
-            
-            
-            
-            
-            
-            
-            print self.line
-            
+#            self.keepheadersandvaluesonly()
+
+            self.extractheaders()
+            self.extractvalues()
             
             
             
                       
-            # write the current line to the relevant file based on the instrument id
-            for instrufile in filelist:
-                if instrufile[0] == (instruid):
-                    instrufile[1].write(self.line+'\n')
+#            # write the current line to the relevant file based on the instrument id
+#            for instrufile in self.filelist:
+#                if instrufile[0] == (self.instruid):
+#                    instrufile[1].write(self.line+'\n')
             
             # load next line in main file. if no more lines the while
             # loop exits
@@ -170,12 +179,19 @@ class processdata():
     
         # last step:
         # closing all open files
-        for instrufile in filelist:
+        for instrufile in self.filelist:
             instrufile[1].close()
             
         mainfile.close()
         
-        
+
+    
+    def writetofile(self):
+        # write the current line to the relevant file based on the instrument id
+        for instrufile in self.filelist:
+            if instrufile[0] == (self.instruid):
+                instrufile[1].write(self.linetowrite+'\n')       
+    
         
 
 
