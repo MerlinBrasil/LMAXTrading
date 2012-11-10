@@ -1,7 +1,31 @@
 '''
 Formats data contained in obevents.txt for use with spreadsheets 
 and data analysis tools and saves the result in separate
-files (one file per instrument) in data/
+files (one file per instrument)
+
+
+The data in obevents.txt has the following format:
+
+#    OrderBookEventImpl{instrumentId=4001, valuationBidPrice=1.27216, timeStamp=1352483961316, valuationAskPrice=1.2722
+#    , lastMarketClosePrice=1.27466, bidPrices=[PricePoint{price=1.27216, quantity=150}, PricePoint{price=1.27215, quantity=260}
+#    , PricePoint{price=1.27214, quantity=300}, PricePoint{price=1.27213, quantity=100}, PricePoint{price=1.27212, quantity=1300}]
+#    , askPrices=[PricePoint{price=1.2722, quantity=300}, PricePoint{price=1.27221, quantity=50}, PricePoint{price=1.27222, quantity=250}
+#    , PricePoint{price=1.27223, quantity=250}, PricePoint{price=1.27225, quantity=1150}], lastTradedPrice=1.27217
+#    , dailyHighestTradedPrice=1.27906, dailyLowestTradedPrice=1.269, marketClosePriceTimeStamp='1352412000000'}
+#    , timereceived='1352483961889', instruname=EUR/USD, obeventrow=1
+
+
+The formatted data looks like this:
+
+#    instrumentId,valuationBidPrice,timeStamp,valuationAskPrice,lastMarketClosePrice,bid-price,bid-quantity,bid-price,bid-quantity
+#    ,bid-price,bid-quantity,bid-price,bid-quantity,bid-price,bid-quantity,ask-price,ask-quantity,ask-price,ask-quantity,ask-price
+#    ,ask-quantity,ask-price,ask-quantity,ask-price,ask-quantity,lastTradedPrice,dailyHighestTradedPrice,dailyLowestTradedPrice
+#    ,marketClosePriceTimeStamp,timereceived,instruname,obeventrow
+#    4001,1.26981,1352467491695,1.26984,1.27466,1.26981,275,1.2698,450,1.26979,1200,1.26978,375,1.26976,250,1.26984,325,1.26985
+#    ,250,1.26986,1250,1.26987,100,1.26988,775,1.26982,1.27906,1.269,1352412000000,1352467492255,EUR/USD,1
+
+
+The formatted data is stored in: /data/
 
 
 
@@ -18,119 +42,19 @@ import string
 import datetime
 import time
 import os
-from symbol import if_stmt
 
 
 class processdata():
     
     
-    def extractheaders(self):
-    # extract headers
-    # run below only for the first line in the file
-        if self.headerflag:
-            
-            # extract headers
-            linesp = re.findall(r'(\b[\w-]+)=', self.line)
-        
-            # merge headers into one string
-            finstrg = ''
-            for strg in linesp:
-                finstrg += strg+','
-            
-            # remove crappy comma at the end
-            self.linetowrite = finstrg[:len(finstrg)-1]
-            
-            self.writetofile()
-            
-            self.headerflag = False
-        
-               
-        
-        
-        
- 
-    def extractvalues(self):
-        
-        # remove single quotes
-        self.line = re.sub(r'\'', '', self.line)
-        
-
-
-            
     
-    # extract values
-    # run below for ALL the lines in the file
-    
-        # extract values
-        patfind = re.compile(r'=([\w\d\.\/]+)\b')
-        linesp = re.findall(patfind, self.line)
-    
-        # merge values into one string
-        finstrg = ''
-        for strg in linesp:
-            finstrg += strg+','
-        # remove crappy comma at the end
-        self.linetowrite = finstrg[:len(finstrg)-1]
-
-        self.writetofile()
-
-
-
-            
-    def keepheadersandvaluesonly(self):
-                # remove crap at beginning and end
-                self.line = re.sub(r'OrderBookEventImpl{', '', self.line)
-                self.line = re.sub(r'}, timereceived', ', timereceived', self.line)
-                
-                # remove single quotes
-                self.line = re.sub(r'\'', '', self.line)
-                
-                
-                # extract first part of string
-                part1 = re.findall(r'.*bidPrices', self.line)[0]
-                part1 = re.sub('bidPrices', '', part1)
-                
-                # extract second part of string        
-                part2 = re.findall(r'bidPrices.*\], askPrices', self.line)[0]
-                part2 = re.sub('askPrices', '', part2)
-                part2 = re.sub('bidPrices=\[', '', part2)        
-                part2 = re.sub('PricePoint{', '', part2)        
-                part2 = re.sub('price', 'bid-price', part2)
-                part2 = re.sub('quantity', 'bid-quantity', part2)
-                part2 = re.sub('}', '', part2)
-                part2 = re.sub('\]', '', part2)
-                
-                # extract third part of string
-                part3 = re.findall(r'askPrices.*', self.line)[0]
-                part3 = re.sub('askPrices=\[', '', part3)        
-                part3 = re.sub('PricePoint{', '', part3)        
-                part3 = re.sub('price', 'ask-price', part3)
-                part3 = re.sub('quantity', 'ask-quantity', part3)
-                part3 = re.sub('}', '', part3)
-                part3 = re.sub('\]', '', part3)        
-                
-                # merge all sub strings together
-                self.line = part1 + part2 + part3
-                
-#                print self.line
-#            
-#            #write result to file
-#            instrufile.write(line)
-
-
-
-
     def processfile(self):
         instruidlist = []
         self.filelist = []
-        
-        
 
         mainfile = open("/Users/julienmonnier/workspace/LMAXTrading/obevents.txt", "r")
         self.line = mainfile.readline()
         
-        
-
         # main loop.  We are reading the content of mainfile line by line so as
         # to reduce memory footprint and increase reading speed
         while self.line:
@@ -159,38 +83,92 @@ class processdata():
 
             
             
-#            self.keepheadersandvaluesonly()
-
-            self.extractheaders()
+            self.keep_headervalue_pairs_only()
+            
+            if self.headerflag:
+                self.extractheaders()
+                self.writetofile()
+                
             self.extractvalues()
+            self.writetofile()
+
             
-            
-            
-                      
-#            # write the current line to the relevant file based on the instrument id
-#            for instrufile in self.filelist:
-#                if instrufile[0] == (self.instruid):
-#                    instrufile[1].write(self.line+'\n')
-            
-            # load next line in main file. if no more lines the while
-            # loop exits
+
+            # last statement in while loop
+            # loads next line in main file into line 
+            # if no more lines, while loop exits
             self.line = mainfile.readline()
-            
-    
-        # last step:
-        # closing all open files
+        
+        # first statement after while loop
+        # close all open files
         for instrufile in self.filelist:
             instrufile[1].close()
-            
         mainfile.close()
-        
+
+    # end of processdata()   
+    # =================================================
+    # =================================================
 
     
+    
+    # does what it says on the tin
+    def keep_headervalue_pairs_only(self):
+        
+        # regexp to split line's data into named groups 
+        p = re.compile(r'(?P<start>^.*)(?P<bid>[[][^]]*[]])(?P<middle>.*)(?P<ask>[[][^]]*[]])(?P<end>.*$)')
+        
+        # add bid prefix to bid prices and quantities and do the same for ask prices and quantities
+        self.line = (p.search(self.line).group('start')
+            + re.sub(r'quantity','bid-quantity',re.sub(r'price','bid-price',p.search(self.line).group('bid')))
+            + p.search(self.line).group('middle')
+            + re.sub(r'quantity','ask-quantity',re.sub(r'price','ask-price',p.search(self.line).group('ask')))
+            + p.search(self.line).group('end'))
+        
+        # remove all non necessary info contained in line in order to keep only pairs of 'header=value'
+        self.line = re.sub(r'OrderBookEventImpl|bidPrices=|askPrices=|PricePoint|[[\]{}\']','',self.line)
+
+
+
+    # extracts headers
+    def extractheaders(self):
+        
+        # extract headers
+        linesp = re.findall(r'(\b[\w-]+)=', self.line)
+    
+        # merge headers into one string
+        finstrg = ''
+        for strg in linesp:
+            finstrg += strg+','
+        
+        # remove comma at the end and save to variable
+        self.linetowrite = finstrg[:len(finstrg)-1]
+
+        self.headerflag = False
+        
+        
+    # extracts values
+    def extractvalues(self):
+        
+        # extract values
+        patfind = re.compile(r'=([\w\d\.\/]+)\b')
+        linesp = re.findall(patfind, self.line)
+    
+        # merge values into one string
+        finstrg = ''
+        for strg in linesp:
+            finstrg += strg+','
+        # remove comma at the end and save to variable
+        self.linetowrite = finstrg[:len(finstrg)-1]
+
+
+    # write formatted line of data into the relevant file based on value of instrument id
     def writetofile(self):
-        # write the current line to the relevant file based on the instrument id
         for instrufile in self.filelist:
             if instrufile[0] == (self.instruid):
-                instrufile[1].write(self.linetowrite+'\n')       
+                instrufile[1].write(self.linetowrite+'\n')
+
+
+    
     
         
 
@@ -198,23 +176,7 @@ class processdata():
 if __name__ == '__main__':
     processdata().processfile()
 
-
-
-#    line = '''instrumentId=4001, valuationBidPrice=1.26981, timeStamp=1352467491695, valuationAskPrice=1.26984, lastMarketClosePrice=1.27466, bid-price=1.26981, bid-quantity=275, bid-price=1.2698, bid-quantity=450, bid-price=1.26979, bid-quantity=1200, bid-price=1.26978, bid-quantity=375, bid-price=1.26976, bid-quantity=250, ask-price=1.26984, ask-quantity=325, ask-price=1.26985, ask-quantity=250, ask-price=1.26986, ask-quantity=1250, ask-price=1.26987, ask-quantity=100, ask-price=1.26988, ask-quantity=775, lastTradedPrice=1.26982, dailyHighestTradedPrice=1.27906, dailyLowestTradedPrice=1.269, marketClosePriceTimeStamp='1352412000000', timereceived='1352467492255', instruname=EUR/USD, obeventrow=1'''
-#    print re.findall(r'(\b[\w-]+)=', line)
-
-    
-
-
-
-
-
-
-
-
-
-
-
+            
 
 
 
