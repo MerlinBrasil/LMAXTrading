@@ -68,12 +68,7 @@ class ProcessData():
         cls.timeproc = timeproc
         cls.timeelepsed = []
 
-        # could be a with statement
         with open("/Users/julienmonnier/workspace/LMAXTrading/obevents.txt", "r") as mainfile:
-            
-            
-            
-            
             
             cls.line = mainfile.readline()
             
@@ -147,7 +142,7 @@ class ProcessData():
             + re.sub(r'quantity','ask-quantity',re.sub(r'price','ask-price',p.search(cls.line).group('ask')))
             + p.search(cls.line).group('end'))
         
-        # remove all non necessary info contained in line in order to keep only pairs of 'header=value'
+        # remove all non necessary info contained in cls.line in order to keep only pairs of 'header=value'
         cls.line = re.sub(r'OrderBookEventImpl|bidPrices=|askPrices=|PricePoint|[[\]{}\']','',cls.line)
 
 
