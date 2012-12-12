@@ -60,8 +60,8 @@ class ProcessData():
     """
     
     # main method
-    @classmethod
-    def processfile(cls, timeproc=False):
+    @staticmethod
+    def processfile(cls,timeproc=False):
         cls.instruidlist = []
         cls.filelist = []
         
@@ -110,7 +110,7 @@ class ProcessData():
 
     # opens a new instrument file based on value of instrument ID retrieved from
     # cls.line.  Does nothing if file already open
-    @classmethod
+    @staticmethod
     def _open_instrument_file(cls):
         # Extract security ID from cls.line and save to class instance for later use
             cls.instruid = re.search(r'\d+', cls.line).group()
@@ -129,7 +129,7 @@ class ProcessData():
                 cls.headerflag = True
     
     # does what it says on the tin
-    @classmethod
+    @staticmethod
     def _keep_headervalue_pairs_only(cls):
         
         # regexp to split line's data into named groups 
@@ -148,7 +148,7 @@ class ProcessData():
 
 
     # extracts headers
-    @classmethod
+    @staticmethod
     def _extractheaders(cls):
         
         # extract headers
@@ -166,7 +166,7 @@ class ProcessData():
         
         
     # extracts values
-    @classmethod
+    @staticmethod
     def _extractvalues(cls):
         
         # extract values
@@ -182,7 +182,7 @@ class ProcessData():
 
 
     # write formatted line of data into the relevant file based on value of instrument id
-    @classmethod
+    @staticmethod
     def _writetofile(cls):
         for instrufile in cls.filelist:
             if instrufile[0] == (cls.instruid):
