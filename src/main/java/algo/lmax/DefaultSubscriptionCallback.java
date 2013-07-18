@@ -1,6 +1,6 @@
-package algo.lmax.my;
+package algo.lmax;
 
-import algo.lmax.my.userinputs.UserInputsHandler;
+import algo.lmax.userinputs.UserInputsHandler;
 
 import com.lmax.api.Callback;
 import com.lmax.api.FailureResponse;

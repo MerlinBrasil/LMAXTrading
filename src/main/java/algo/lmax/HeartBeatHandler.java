@@ -1,4 +1,4 @@
-package algo.lmax.my;
+package algo.lmax;
 
 import com.lmax.api.Callback;
 import com.lmax.api.FailureResponse;

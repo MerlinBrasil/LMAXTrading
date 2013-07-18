@@ -1,4 +1,4 @@
-package algo.lmax.my.userinputs;
+package algo.lmax.userinputs;
 
 
 
@@ -10,11 +10,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import algo.lmax.my.DefaultSubscriptionCallback;
-import algo.lmax.my.HeartBeatHandler;
-import algo.lmax.my.InstrumentsInfo;
-import algo.lmax.my.InstrumentsInfo.getID;
-import algo.lmax.my.LmaxTrading;
+import algo.lmax.DefaultSubscriptionCallback;
+import algo.lmax.HeartBeatHandler;
+import algo.lmax.InstrumentsInfo;
+import algo.lmax.LmaxTrading;
+import algo.lmax.InstrumentsInfo.getID;
 
 import com.lmax.api.Session;
 import com.lmax.api.Callback;

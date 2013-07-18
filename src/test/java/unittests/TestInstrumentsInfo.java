@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
-import algo.lmax.my.InstrumentsInfo;
+import algo.lmax.InstrumentsInfo;
 
 public class TestInstrumentsInfo {
 

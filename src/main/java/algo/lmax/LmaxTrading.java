@@ -1,4 +1,4 @@
-package algo.lmax.my;
+package algo.lmax;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,12 +19,12 @@ import java.util.logging.Logger;
 import javax.swing.plaf.SliderUI;
 
 
-import algo.lmax.my.LoginBuilder.LoginInfo;
-import algo.lmax.my.strategies.IsMarketBusy;
-import algo.lmax.my.strategies.Strategy;
-import algo.lmax.my.userinputs.UserInputsHandler;
-import algo.lmax.my.userinputs.UserInputsHandlerImpl;
-import algo.lmax.my.userinputs.UserRequestsHandler;
+import algo.lmax.LoginBuilder.LoginInfo;
+import algo.lmax.strategies.IsMarketBusy;
+import algo.lmax.strategies.Strategy;
+import algo.lmax.userinputs.UserInputsHandler;
+import algo.lmax.userinputs.UserInputsHandlerImpl;
+import algo.lmax.userinputs.UserRequestsHandler;
 
 import com.lmax.api.Callback;
 import com.lmax.api.FailureResponse;

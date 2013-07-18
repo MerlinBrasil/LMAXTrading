@@ -1,6 +1,6 @@
-package algo.lmax.my;
+package algo.lmax;
 
-import algo.lmax.my.strategies.Strategy;
+import algo.lmax.strategies.Strategy;
 
 public interface OrderBookEventProcessor {
 

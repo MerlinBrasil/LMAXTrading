@@ -1,4 +1,4 @@
-package algo.lmax.my.userinputs;
+package algo.lmax.userinputs;
 
 
 

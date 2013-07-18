@@ -1,4 +1,4 @@
-package algo.lmax.my.strategies;
+package algo.lmax.strategies;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 
-import algo.lmax.my.OrderBookEventProcessor;
+import algo.lmax.OrderBookEventProcessor;
 
 import com.lmax.api.FixedPointNumber;
 import com.lmax.api.internal.events.OrderBookEventImpl;

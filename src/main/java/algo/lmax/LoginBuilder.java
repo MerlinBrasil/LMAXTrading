@@ -1,4 +1,4 @@
-package algo.lmax.my;
+package algo.lmax;
 
 
 import java.io.IOException;
@@ -14,9 +14,9 @@ import org.apache.commons.io.input.ProxyInputStream;
 
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser.forExpr_return;
 
-import algo.lmax.my.userinputs.UserInputsHandler;
-import algo.lmax.my.userinputs.UserInputsHandlerImpl;
-import algo.lmax.my.userinputs.UserLoginEventsListener;
+import algo.lmax.userinputs.UserInputsHandler;
+import algo.lmax.userinputs.UserInputsHandlerImpl;
+import algo.lmax.userinputs.UserLoginEventsListener;
 
 /**
  * Handles the setup process of user login credentials

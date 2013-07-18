@@ -1,4 +1,4 @@
-package algo.lmax.my;
+package algo.lmax;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

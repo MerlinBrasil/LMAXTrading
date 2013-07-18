@@ -1,4 +1,4 @@
-package algo.lmax.my;
+package algo.lmax;
 
 
 
